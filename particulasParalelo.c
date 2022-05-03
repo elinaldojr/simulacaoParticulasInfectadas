@@ -5,7 +5,7 @@
 
 #define LARGURA 1024
 #define ALTURA 1024
-#define N 2000
+#define N 2048
 #define CICLOS 20
 #define TX_CONTAGIO 30 //30%
 
@@ -68,14 +68,7 @@ int main() {
 
     printf("#Ciclos: %d\n", i);
     printf("Total infectados: %d\n\n", contaParticulasInfectadas(particulas));
-    printf("Tempo = %fs\n", wtime );
-
-    int cont = 0;
-    for(i=0; i<N;i++){
-        if(particulas[i].infectada == 1)
-            cont++;
-    }
-    printf("%d Infectados de verdade!", cont);
+    printf("Tempo = %f s\n", wtime );
 
     return 0;
 }

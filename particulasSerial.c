@@ -5,7 +5,7 @@
 
 #define LARGURA 1024
 #define ALTURA 1024
-#define N 2000
+#define N 2048
 #define CICLOS 20
 #define TX_CONTAGIO 30 //30%
 
@@ -65,9 +65,7 @@ int main() {
 
     printf("#Ciclos: %d\n", i);
     printf("Total infectados: %d\n\n", contaParticulasInfectadas(particulas));
-    printf("Tempo = %fs\n", wtime );
-
-
+    printf("Tempo = %f s\n", wtime );
 
     return 0;
 }
@@ -288,7 +286,7 @@ struct Vetor divisao(struct Vetor A, float n){
 }
 
 float dist(struct Vetor A, struct Vetor B){
-    return sqrt(pow(B.x - A.x, 2) + pow(B.y - A.y, 2));
+    return sqrt((B.x - A.x)*(B.x - A.x) + (B.y - A.y)*(B.y - A.y));
 }
 
 float magnitude(struct Vetor A){
