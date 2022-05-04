@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <omp.h>
 
 #define LARGURA 1024
 #define ALTURA 1024
 #define N 2048
-#define CICLOS 20
+#define CICLOS 50
 #define TX_CONTAGIO 30 //30%
 
 struct Vetor{
@@ -50,7 +51,13 @@ int main() {
 
     printf("Simulacao iniciada (PARALELO):\n\n");
 
-    clock_t begin = clock();
+    //clock_t begin = clock();
+
+    double start;
+    double end;
+    start = omp_get_wtime();
+
+
 
     inicializaParticulas(particulas);
     inicializaInfeccao(particulas);
@@ -63,12 +70,15 @@ int main() {
         atualizaPosicaoParticulas(particulas, separacao, alinhamento, coesao);
     }
 
-    clock_t end = clock();
-    wtime = (double)(end - begin) / CLOCKS_PER_SEC;
+    //clock_t end = clock();
+    //wtime = (double)(end - begin) / CLOCKS_PER_SEC;
 
     printf("#Ciclos: %d\n", i);
     printf("Total infectados: %d\n\n", contaParticulasInfectadas(particulas));
-    printf("Tempo = %f s\n", wtime );
+    //printf("Tempo = %f s\n", wtime );
+
+    end = omp_get_wtime();
+    printf("Tempo = %f s\n", end - start);
 
     return 0;
 }
@@ -92,7 +102,7 @@ void inicializaParticulas(struct Particula particulas[]) {
 void imprimeParticulas(struct Particula particulas[]) {
     int i;
 
-    for(i=0; i<N; i++){
+    for(i=0; i<1; i++){
         printf("%d\nposicao: (%.2f, %.2f)\n", i, particulas[i].posicao.x, particulas[i].posicao.y);
         printf("velocidade: (%.2f, %.2f)\n", particulas[i].velocidade.x, particulas[i].velocidade.y);
         printf("aceleracao: (%.2f, %.2f)\n\n", particulas[i].aceleracao.x, particulas[i].aceleracao.y);
@@ -265,12 +275,11 @@ void regraContagio(int indice, struct Particula particulas[]){
             }
         }
     }
-
 }
 
 int contaParticulasInfectadas(struct Particula particulas[]){
     int i, infectados = 0;
-    for(i=0; i<N;i++){
+    for(i=0; i<N; i++){
         if(particulas[i].infectada == 1)
             infectados++;
     }

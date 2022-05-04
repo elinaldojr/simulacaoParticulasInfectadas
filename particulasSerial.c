@@ -6,7 +6,7 @@
 #define LARGURA 1024
 #define ALTURA 1024
 #define N 2048
-#define CICLOS 20
+#define CICLOS 50
 #define TX_CONTAGIO 30 //30%
 
 struct Vetor{
@@ -22,7 +22,8 @@ struct Particula{
 void inicializaParticulas(struct Particula particulas[]);
 void imprimeParticulas(struct Particula particulas[]);
 void inicializaInfeccao(struct Particula particulas[]);
-void atualizaPosicaoParticulas(struct Particula particulas[]);
+void atualizaVetoresParticulas(struct Particula particulas[], struct Vetor separacao[], struct Vetor alinhamento[], struct Vetor coesao[]);
+void atualizaPosicaoParticulas(struct Particula particulas[], struct Vetor separacao[], struct Vetor alinhamento[], struct Vetor coesao[]);
 struct Vetor regraSeparacao(int indice, struct Particula particulas[]);
 struct Vetor regraAlinhamento(int indice, struct Particula particulas[]);
 struct Vetor regraCoesao(int indice, struct Particula particulas[]);
@@ -41,6 +42,7 @@ struct Vetor limita(struct Vetor A, float max);
 
 int main() {
     struct Particula particulas[N];
+    struct Vetor separacao[N], alinhamento[N], coesao[N];
     float largura_espaco, altura_espaco;
     long double vet[N];
     int i;
@@ -57,7 +59,8 @@ int main() {
         //printf("#Ciclo: %d\n", i);
         //printf("Total infectados: %d\n\n", infectados);
         //imprimeParticulas(particulas);
-        atualizaPosicaoParticulas(particulas);
+        atualizaVetoresParticulas(particulas, separacao, alinhamento, coesao);
+        atualizaPosicaoParticulas(particulas, separacao, alinhamento, coesao);
     }
 
     clock_t end = clock();
@@ -102,6 +105,52 @@ void inicializaInfeccao(struct Particula particulas[]){
     particulas[indice].infectada = 1;
 }
 
+void atualizaVetoresParticulas(struct Particula particulas[], struct Vetor separacao[], struct Vetor alinhamento[], struct Vetor coesao[]){
+    int i;
+
+    for(i=0; i<N; i++){
+        separacao[i] = regraSeparacao(i, particulas);
+        alinhamento[i] = regraAlinhamento(i, particulas);
+        coesao[i] = regraCoesao(i, particulas);
+
+        if(particulas[i].infectada == 1){
+            regraContagio(i, particulas);
+        }
+    }
+}
+
+void atualizaPosicaoParticulas(struct Particula particulas[], struct Vetor separacao[], struct Vetor alinhamento[], struct Vetor coesao[]){
+    int i;
+
+    for(i=0; i<N; i++){
+        particulas[i].aceleracao = soma(particulas[i].aceleracao, separacao[i]);
+        particulas[i].aceleracao = soma(particulas[i].aceleracao, alinhamento[i]);
+        particulas[i].aceleracao = soma(particulas[i].aceleracao, coesao[i]);
+        particulas[i].aceleracao = defineMagnitude(particulas[i].aceleracao, particulas[i].forca_max);
+
+        particulas[i].velocidade = soma(particulas[i].velocidade, particulas[i].aceleracao);
+        particulas[i].velocidade = limita(particulas[i].velocidade, particulas[i].velocidade_max);
+
+
+        particulas[i].posicao = soma(particulas[i].posicao, particulas[i].velocidade);
+        if(particulas[i].posicao.x > LARGURA){
+            particulas[i].posicao.x = 0;
+        }
+        else if(particulas[i].posicao.x < 0){
+            particulas[i].posicao.x = LARGURA;
+        }
+
+        if(particulas[i].posicao.y > ALTURA){
+            particulas[i].posicao.y = 0;
+        }
+        else if(particulas[i].posicao.y < 0){
+            particulas[i].posicao.y = ALTURA;
+        }
+    }
+
+}
+
+/*
 void atualizaPosicaoParticulas(struct Particula particulas[]){
     int i;
     struct Vetor separacao, alinhamento, coesao;
@@ -140,6 +189,7 @@ void atualizaPosicaoParticulas(struct Particula particulas[]){
             particulas[i].posicao.y = ALTURA;
     }
 }
+*/
 
 struct Vetor regraSeparacao(int indice, struct Particula particulas[]){
     struct Vetor velocidade_media, direcao, diferenca;
@@ -251,7 +301,7 @@ void regraContagio(int indice, struct Particula particulas[]){
 
 int contaParticulasInfectadas(struct Particula particulas[]){
     int i, infectados = 0;
-    for(i=0; i<N;i++){
+    for(i=0; i<N; i++){
         if(particulas[i].infectada == 1)
             infectados++;
     }
